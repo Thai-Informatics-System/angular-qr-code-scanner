@@ -1,0 +1,31 @@
+@if (!isMobilePreview) {
+  <h1 mat-dialog-title class="flex flex-row justify-between" style="margin-bottom: 0px; background-color: var(--tis-primary);">
+    <span class="text-white">{{data?.label ?? 'QR Code Scanner'}}</span>
+    <mat-icon class="tis-curser-pointer text-white" (click)="onClose()">clear</mat-icon>
+  </h1>
+}
+@if (isMobilePreview) {
+  <mat-toolbar class="toolbar w-full" style="padding-left: 0.5rem; padding-right: 0.5rem;" color="primary">
+    <div class="flex items-center justify-between w-full">
+      <div class="flex items-center" style="gap: 12px;">
+        <button class="back-button" (click)="onClose()">
+          <mat-icon class="icon" inline="true">arrow_back</mat-icon>
+        </button>
+        <div class="px-3">
+          <h3 class="heading">{{data?.label ?? 'QR Code Scanner'}}</h3>
+        </div>
+      </div>
+    </div>
+  </mat-toolbar>
+}
+<div mat-dialog-content style="padding: 0px; overflow: hidden;" [style.max-height]="isMobilePreview ? '100vh' : null">
+  @if(isMobilePreview){
+    <div class="scanner-shell relative">
+      <div class="w-full absolute flex justify-center items-center shade-view" style="background-image: url('assets/images/bg-scanner2.png')"></div>
+      <angular-qr-code-scanner (onScanned)="onCodeResult($event)" [config]="{isPauseAfterScan: true, isShowScannedResult: false}" [isValidate]="true"></angular-qr-code-scanner>
+    </div>
+  }
+  @else{
+  <angular-qr-code-scanner (onScanned)="onCodeResult($event)" [config]="{isPauseAfterScan: true, isShowScannedResult: true}" [isValidate]="true"></angular-qr-code-scanner>
+}
+</div>

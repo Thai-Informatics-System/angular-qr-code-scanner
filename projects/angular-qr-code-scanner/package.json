@@ -1,0 +1,13 @@
+{
+  "name": "angular-qr-code-scanner",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^19.2.0",
+    "@angular/core": "^19.2.0",
+    "ngx-scanner-qrcode": "^1.7.6"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

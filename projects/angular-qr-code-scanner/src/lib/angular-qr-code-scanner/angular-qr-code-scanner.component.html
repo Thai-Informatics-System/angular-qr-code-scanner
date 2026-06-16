@@ -1,0 +1,58 @@
+<div class="w-full relative">
+    @if (showScanner) {
+    <!-- ngx-scanner-qrcode -->
+    <ngx-scanner-qrcode #action="scanner" [config]="qrConfig" (event)="onEvent($event, action)"></ngx-scanner-qrcode>
+
+    @if(error){
+    <div
+        class="w-full h-full absolute top-0 left-0 flex flex-col justify-center items-center bg-gray-900 bg-opacity-90 text-white p-4">
+        <mat-icon class="text-red-500 mb-3" style="font-size: 72px; width: 72px; height: 72px;">videocam_off</mat-icon>
+        <p class="text-center text-lg font-semibold mb-2">Camera Access Required</p>
+        <p class="text-center text-sm">{{ errorText }}</p>
+        <p class="text-center text-xs mt-3 text-gray-300">Please check your browser settings and allow camera access.
+        </p>
+    </div>
+    }
+
+    @if(action.isLoading && !loadedCamera && !error){
+    <div class="w-full h-full absolute top-0 left-0 flex justify-center bg-transparent">
+        <mat-progress-spinner color="primary" mode="indeterminate" [diameter]="70"></mat-progress-spinner>
+    </div>
+    }
+
+    <div class="w-full flex justify-center gap-3 absolute w-full bottom-0 left-0 bg-transparent bottom-action"
+        style="z-index: 1;">
+        @if ((action?.devices?.value?.length ?? 0) > 1) {
+        <button mat-icon-button (click)="onDeviceSelectChange()">
+            <mat-icon class="text-white">cameraswitch</mat-icon>
+        </button>
+        }
+
+        <button mat-icon-button (click)="action.isTorch = !action.isTorch; handle(action, 'torcher')">
+            @if (action?.isTorch) {
+            <mat-icon class="text-white">flash_on</mat-icon>
+            }
+            @if (!action?.isTorch) {
+            <mat-icon class="text-white">flash_off</mat-icon>
+            }
+        </button>
+
+        @if (action?.isPause) {
+        <button mat-icon-button (click)="handle(action, 'play')">
+            <mat-icon class="text-white">restart_alt</mat-icon>
+        </button>
+        }
+
+        @if (config?.isEnableMode) {
+        <button mat-icon-button (click)="onClickMode()">
+            @if (isContinuousMode) {
+            <mat-icon>repeat</mat-icon>
+            }
+            @if (!isContinuousMode) {
+            <mat-icon>repeat_one</mat-icon>
+            }
+        </button>
+        }
+    </div>
+    }
+</div>
