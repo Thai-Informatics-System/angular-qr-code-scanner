@@ -436,7 +436,7 @@ export class AngularQrCodeScannerComponent {
 
   onClickMode(){
     this.config.isContinuousMode = !this.config.isContinuousMode;
-    this.config.isPauseAfterScan = !this.config.isContinuousMode;
+    this.config.isPauseAfterScan = this.config.isContinuousMode;
     this.onChangeMode.emit(this.config.isContinuousMode);
   }
 

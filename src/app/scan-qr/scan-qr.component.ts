@@ -126,6 +126,8 @@ export class ScanQrComponent implements OnInit {
 
   onChangeMode(isContinuousMode: boolean) {
     console.log('onChangeMode:', isContinuousMode);
+    this.data.config.isContinuousMode = isContinuousMode;
+    this.data.config.isPauseAfterScan = isContinuousMode;
   }
 
 }

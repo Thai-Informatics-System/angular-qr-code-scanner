@@ -22,7 +22,7 @@
   @if(isMobilePreview){
     <div class="scanner-shell relative">
       <div class="w-full absolute flex justify-center items-center shade-view" style="background-image: url('assets/images/bg-scanner2.png')"></div>
-      <angular-qr-code-scanner (onScanned)="onCodeResult($event)" [config]="data.config"></angular-qr-code-scanner>
+      <angular-qr-code-scanner (onScanned)="onCodeResult($event)" [config]="data.config" (onChangeMode)="onChangeMode($event)"></angular-qr-code-scanner>
     </div>
   }
   @else{
