@@ -1,8 +1,9 @@
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
-import { Component, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { Observable, map, shareReplay } from 'rxjs';
+import { AngularQrCodeScannerConfig } from '../angular-qr-code-scanner.models';
 
 @Component({
   selector: 'angular-qr-code-scanner',
@@ -11,15 +12,26 @@ import { Observable, map, shareReplay } from 'rxjs';
   styleUrl: './angular-qr-code-scanner.component.css'
 })
 export class AngularQrCodeScannerComponent {
-  @Input() config: any = {
+  private _config: AngularQrCodeScannerConfig = {
     isPauseAfterScan: true,
-    isShowScannedResult: false,
     isEnableMode: true,
-  }
+    isValidate: false,
+    isContinuousMode: false,
+    playPause: false,
+  };
 
-  @Input() isValidate = false;
-  @Input() isContinuousMode = false;
-  @Input() playPause = false;
+  @Input() set config(value: AngularQrCodeScannerConfig) {
+    const prevPlayPause = this._config.playPause;
+    this._config = value;
+    if (value.playPause && value.playPause !== prevPlayPause) {
+      this.action?.play();
+      this.prepareVideoForIos();
+      this.tryPlayVideo();
+    }
+  }
+  get config(): AngularQrCodeScannerConfig {
+    return this._config;
+  }
   public qrConfig: ScannerQRCodeConfig = {
     constraints: {
       video: {
@@ -91,15 +103,6 @@ export class AngularQrCodeScannerComponent {
       console.log('IS HANDSET:', r);
       this.isMobile = r;
     });
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['playPause']) {
-      this.playPause = changes['playPause'].currentValue;
-      this.action?.play();
-      this.prepareVideoForIos();
-      this.tryPlayVideo();
-    }
   }
 
   ngAfterViewInit() {
@@ -377,68 +380,7 @@ export class AngularQrCodeScannerComponent {
     console.log('onEvent:', e[0].value);
     this.qrResultString = e[0].value;
     if(this.qrResultString && this.qrResultString != ''){
-      if(this.isValidate){
-        if (this.qrResultString.startsWith('S:')) {
-          console.log('New QR Code with less data. FORMAT:  S:3_CHAR_ENTITY_NAME:ORG_ID:ID_OF_ENTITY');
-          let [x, entityName, orgId, entityId, documentNumber] = this.qrResultString.split(':');
-          console.log('QR Splits:', x, entityName, orgId, entityId);
-          let scannedData = {
-            type: entityName,
-            oid: parseInt(orgId),
-            id: parseInt(entityId),
-            documentNumber: documentNumber
-          }
-
-          console.log('onCodeResult 1 :: scannedData', scannedData);
-          this.onScanned.emit(scannedData);
-
-        } else if(this.isJSONString(this.qrResultString)) {
-          try {
-            console.log('onCodeResult 2 :: VALID JSON', this.isJSONString(this.qrResultString), this.qrResultString);
-            let scannedData = JSON.parse(this.qrResultString);
-            if(scannedData){
-              console.log('onCodeResult 3 :: scannedData', scannedData);
-              console.log('onCodeResult 4 :: scannedData', scannedData?.qn, scannedData?.qn?.startsWith('SM'));
-
-              if(scannedData?.qn?.startsWith('SM')) {
-                let [a, type, _] = scannedData.qn.split(':');
-                scannedData.m = type;
-                scannedData.a = a;
-              }
-              if(scannedData?.a == 'SM') {
-                let dataToEmit = {
-                  type: scannedData?.m,
-                  oid: parseInt(scannedData?.o || scannedData?.oid),
-                  id: parseInt(scannedData?.id),
-                  documentNumber: scannedData?.documentNumber ?? null,
-                  qn: scannedData?.qn ?? null
-                };
-                this.onScanned.emit(dataToEmit);
-                console.log('onCodeResult 5 :: scannedData', dataToEmit);
-              }
-              else{
-                this.error = true;
-                this.errorText = 'This Qr Code is not belong to this project.';
-                this.snackBar.open(this.errorText, 'Close', { duration: 3000, panelClass: ['error-snackbar'] });
-              }
-            }
-            else{
-              this.error = true;
-              this.errorText = 'Please scan valid QR Code.';
-              this.snackBar.open(this.errorText, 'Close', { duration: 3000, panelClass: ['error-snackbar'] });
-            }
-          } catch (error) {
-            this.error = true;
-            this.errorText = 'Invalid QR Code.';
-            this.snackBar.open(this.errorText, 'Close', { duration: 3000, panelClass: ['error-snackbar'] });
-          }
-        } else {
-          this.onScanned.emit(this.qrResultString);
-        }
-      }
-      else{
-        this.onScanned.emit(this.qrResultString);
-      }
+      this.onScanned.emit(this.qrResultString);
     }
   }
 
@@ -493,14 +435,9 @@ export class AngularQrCodeScannerComponent {
   }
 
   onClickMode(){
-    this.isContinuousMode = !this.isContinuousMode;
-    if(this.isContinuousMode){
-      this.config.isPauseAfterScan = true;
-    }
-    else{
-      this.config.isPauseAfterScan = false;
-    }
-    this.onChangeMode.emit(this.isContinuousMode);
+    this.config.isContinuousMode = !this.config.isContinuousMode;
+    this.config.isPauseAfterScan = !this.config.isContinuousMode;
+    this.onChangeMode.emit(this.config.isContinuousMode);
   }
 
   ngOnDestroy(): void {

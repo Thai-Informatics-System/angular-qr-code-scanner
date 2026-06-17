@@ -1,4 +1,33 @@
 /* You can add global styles to this file, and also import other style files */
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #3838a2;
+}
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.tis-details-dialog {
+    mat-dialog-container {
+      .mat-mdc-dialog-title {
+        padding: 8px 16px;
+        background-color: #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+  
+        &::before {
+          content: unset;
+        }
+      }
+  
+      .mat-mdc-dialog-actions {
+        justify-content: space-between;
+      }
+    }
+}
