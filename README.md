@@ -67,6 +67,93 @@ npm publish
 
 ---
 
+## Usage example
+
+Import `AngularQrCodeScannerModule`, drop the `<angular-qr-code-scanner>` element
+in your template, and handle the `onScanned` / `onChangeMode` outputs.
+
+**Component (`*.component.ts`):**
+
+```typescript
+import { Component } from '@angular/core';
+import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
+
+@Component({
+  selector: 'app-scan',
+  standalone: true,
+  imports: [AngularQrCodeScannerModule],
+  templateUrl: './scan.component.html',
+})
+export class ScanComponent {
+  scannedValue = '';
+
+  config: AngularQrCodeScannerConfig = {
+    isPauseAfterScan: true,   // stop after a successful scan
+    isEnableMode: true,       // show the single-shot / continuous toggle
+    isValidate: false,        // emit the raw scanned value
+    isContinuousMode: false,  // single-shot scanning
+  };
+
+  // Fires with the decoded QR string on every successful scan.
+  onScanned(result: string): void {
+    this.scannedValue = result;
+    console.log('QR Code Result:', result);
+  }
+
+  // Fires when the user toggles single-shot vs continuous scanning.
+  onChangeMode(isContinuousMode: boolean): void {
+    this.config.isContinuousMode = isContinuousMode;
+    this.config.isPauseAfterScan = isContinuousMode;
+  }
+}
+```
+
+**Template (`*.component.html`):**
+
+```html
+<angular-qr-code-scanner
+  [config]="config"
+  (onScanned)="onScanned($event)"
+  (onChangeMode)="onChangeMode($event)">
+</angular-qr-code-scanner>
+
+<p *ngIf="scannedValue">Scanned: {{ scannedValue }}</p>
+```
+
+### Using it inside a Material dialog
+
+The demo app (`src/app/scan-qr/`) opens the scanner in a dialog and closes it
+with the decoded value:
+
+```typescript
+import { MatDialog } from '@angular/material/dialog';
+import { ScanQrComponent } from './scan-qr/scan-qr.component';
+
+export class AppComponent {
+  constructor(private dialog: MatDialog) {}
+
+  openScanner(): void {
+    const ref = this.dialog.open(ScanQrComponent, {
+      data: {
+        label: 'Scan QR Code',
+        config: { isPauseAfterScan: true, isEnableMode: true, isValidate: true },
+      },
+    });
+
+    ref.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log('Scanned:', result);
+      }
+    });
+  }
+}
+```
+
+See the [library README](./projects/angular-qr-code-scanner/README.md#api-reference)
+for the full `AngularQrCodeScannerConfig` options and output details.
+
+---
+
 ## Styling (Tailwind CSS)
 
 The demo app is configured with Tailwind CSS. Configuration lives in
