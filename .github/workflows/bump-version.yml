@@ -48,9 +48,9 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || github.token }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org/'
 
@@ -122,5 +122,6 @@ jobs:
 
       - name: Publish to npm
         run: |
-          echo "registry=https://registry.npmjs.org/" > "$HOME/.npmrc"
+          # Clear authToken so npm uses OIDC trusted publishing
+          echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
           npm publish ./dist/${{ env.LIB_NAME }} --access public --provenance
