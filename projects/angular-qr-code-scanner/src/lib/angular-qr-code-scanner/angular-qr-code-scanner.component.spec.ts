@@ -1,5 +1,3 @@
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxScannerQrcodeService } from 'ngx-scanner-qrcode';
@@ -7,31 +5,30 @@ import { of } from 'rxjs';
 
 import { AngularQrCodeScannerComponent } from './angular-qr-code-scanner.component';
 
-const mockBreakpointObserver = {
-  observe: () => of({ matches: false, breakpoints: {} }),
-};
-
 describe('AngularQrCodeScannerComponent', () => {
   let component: AngularQrCodeScannerComponent;
-  let fixture: ComponentFixture<AngularQrCodeScannerComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [AngularQrCodeScannerComponent],
-      providers: [
-        { provide: NgxScannerQrcodeService, useValue: {} },
-        { provide: BreakpointObserver, useValue: mockBreakpointObserver },
-        { provide: MatSnackBar, useValue: { open: jasmine.createSpy('open') } },
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
+  beforeEach(() => {
+    const mockQrService = {} as NgxScannerQrcodeService;
+    const mockBreakpoints = {
+      observe: () => of({ matches: false, breakpoints: {} }),
+    } as unknown as BreakpointObserver;
+    const mockSnackBar = {
+      open: jasmine.createSpy('open'),
+    } as unknown as MatSnackBar;
 
-    fixture = TestBed.createComponent(AngularQrCodeScannerComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    component = new AngularQrCodeScannerComponent(mockQrService, mockBreakpoints, mockSnackBar);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have isPauseAfterScan true by default', () => {
+    expect(component.config.isPauseAfterScan).toBeTrue();
+  });
+
+  it('should have isContinuousMode false by default', () => {
+    expect(component.config.isContinuousMode).toBeFalse();
   });
 });
