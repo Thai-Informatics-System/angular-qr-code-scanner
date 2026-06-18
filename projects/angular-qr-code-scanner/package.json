@@ -1,5 +1,5 @@
 {
-  "name": "angular-qr-code-scanner",
+  "name": "@servicemind.tis/angular-qr-code-scanner",
   "version": "1.0.5",
   "description": "Lightweight Angular library for scanning QR codes using the device camera, with iOS recovery, torch control, and continuous-scan mode.",
   "keywords": [
