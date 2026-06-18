@@ -1,8 +1,8 @@
 # Angular QR Code Scanner — Workspace
 
-This is the development workspace for the [`angular-qr-code-scanner`](./projects/angular-qr-code-scanner/README.md) Angular library. It contains both the publishable library and a demo application used to develop and test it.
+This is the development workspace for the [`angular-qr-code-scanner`](./projects/angular-qr-code-scanner/README.md) Angular library. It contains the publishable library and a demo application used to develop and test it.
 
-> Looking for the library usage docs (installation, API, config options)? See the
+> **Looking for usage docs?** — installation, API reference, and config options are in the
 > **[library README](./projects/angular-qr-code-scanner/README.md)**.
 
 ---
@@ -10,67 +10,42 @@ This is the development workspace for the [`angular-qr-code-scanner`](./projects
 ## Repository structure
 
 ```
-angular-qr-code-scanner-project/
+angular-qr-code-scanner/
+├── .github/
+│   └── workflows/
+│       └── bump-version.yml     # CI/CD: test → bump → tag → publish
+├── scripts/
+│   └── bump-and-inject.mjs      # Semver bump script (patch / minor / none)
 ├── projects/
-│   └── angular-qr-code-scanner/   # the publishable library
-│       ├── src/lib/               # scanner component, module, models, service
-│       └── README.md              # library usage & API reference
-├── src/                           # demo application that consumes the library
+│   └── angular-qr-code-scanner/ # Publishable library
+│       ├── src/lib/             # Component, module, models, service
+│       └── README.md            # npm package README
+├── src/                         # Demo application
 │   └── app/
 │       ├── app.component.*
-│       └── scan-qr/               # dialog-based scanner usage example
-└── angular.json                   # build config for both app and library
+│       └── scan-qr/             # Dialog-based scanner example
+├── angular.json
+├── package.json
+└── tsconfig.json
 ```
 
 ---
 
-## Getting started
-
-Install dependencies:
+## Installation
 
 ```bash
-npm install
+npm install angular-qr-code-scanner
 ```
 
-Run the demo application (auto-reloads on changes):
+Peer dependencies (if not already installed):
 
 ```bash
-ng serve
-```
-
-Then open `http://localhost:4200/`.
-
----
-
-## Working on the library
-
-Build the library into `dist/angular-qr-code-scanner`:
-
-```bash
-ng build angular-qr-code-scanner
-```
-
-Rebuild on every change while developing:
-
-```bash
-npm run build-library-watch
-```
-
-### Publishing
-
-Once built, publish from the output directory:
-
-```bash
-cd dist/angular-qr-code-scanner
-npm publish
+npm install @angular/material @angular/cdk ngx-scanner-qrcode
 ```
 
 ---
 
 ## Usage example
-
-Import `AngularQrCodeScannerModule`, drop the `<angular-qr-code-scanner>` element
-in your template, and handle the `onScanned` / `onChangeMode` outputs.
 
 **Component (`*.component.ts`):**
 
@@ -94,16 +69,12 @@ export class ScanComponent {
     isContinuousMode: false,  // single-shot scanning
   };
 
-  // Fires with the decoded QR string on every successful scan.
   onScanned(result: string): void {
     this.scannedValue = result;
-    console.log('QR Code Result:', result);
   }
 
-  // Fires when the user toggles single-shot vs continuous scanning.
   onChangeMode(isContinuousMode: boolean): void {
-    this.config.isContinuousMode = isContinuousMode;
-    this.config.isPauseAfterScan = isContinuousMode;
+    this.config = { ...this.config, isContinuousMode, isPauseAfterScan: !isContinuousMode };
   }
 }
 ```
@@ -141,9 +112,7 @@ export class AppComponent {
     });
 
     ref.afterClosed().subscribe((result) => {
-      if (result) {
-        console.log('Scanned:', result);
-      }
+      if (result) console.log('Scanned:', result);
     });
   }
 }
@@ -154,23 +123,102 @@ for the full `AngularQrCodeScannerConfig` options and output details.
 
 ---
 
-## Styling (Tailwind CSS)
+## Getting started (development)
 
-The demo app is configured with Tailwind CSS. Configuration lives in
-`tailwind.config.js`, and the `@tailwind base/components/utilities` directives are
-declared in the global `src/styles.scss`. Use Tailwind utility classes directly in
-templates.
+```bash
+npm install
+```
+
+Run the demo app (live-reloads on changes):
+
+```bash
+ng serve
+```
+
+Open `http://localhost:4200/`.
+
+---
+
+## Working on the library
+
+Build the library into `dist/angular-qr-code-scanner`:
+
+```bash
+ng build angular-qr-code-scanner
+# or
+npm run build-library
+```
+
+Rebuild on every change while developing:
+
+```bash
+npm run build-library-watch
+```
 
 ---
 
 ## Running unit tests
 
+Tests run in Chrome (or ChromeHeadless in CI):
+
 ```bash
+# All tests (demo app)
 ng test
+
+# Library tests only
+ng test angular-qr-code-scanner --watch=false
 ```
 
 ---
 
-## Additional Resources
+## CI / CD
 
-For more on the Angular CLI, see the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli).
+Every push to `master` triggers the GitHub Actions workflow
+[`.github/workflows/bump-version.yml`](./.github/workflows/bump-version.yml):
+
+| Step | What it does |
+| ---- | ------------ |
+| **Test** | Runs library unit tests in ChromeHeadless |
+| **Bump version** | Increments the patch version in both `package.json` files via `scripts/bump-and-inject.mjs` |
+| **Verify sync** | Asserts root and library versions match |
+| **Commit** | Pushes the version bump commit back to `master` with `[skip ci]` |
+| **Tag** | Creates and pushes a `vX.Y.Z` git tag |
+| **Build** | Builds the library with `ng-packagr` |
+| **Publish** | Publishes to npm with OIDC provenance (no `NPM_TOKEN` needed) |
+
+### Manual trigger
+
+The workflow can also be triggered manually via **Actions → CI — Test, Bump Version, Tag and Publish → Run workflow**.
+
+### Versioning
+
+- Versions follow [Semantic Versioning](https://semver.org/).
+- The `BUMP` env var in the workflow controls the increment: `patch` (default), `minor`, or `none`.
+- Both `package.json` (workspace root) and `projects/angular-qr-code-scanner/package.json` are always kept in sync.
+
+---
+
+## Publishing manually
+
+Build, then publish from the `dist` directory:
+
+```bash
+npm run build-library
+npm publish ./dist/angular-qr-code-scanner --access public
+```
+
+---
+
+## Styling (Tailwind CSS)
+
+The demo app is configured with Tailwind CSS. Configuration lives in `tailwind.config.js`; the directives are declared in `src/styles.scss`. Use Tailwind utility classes directly in demo templates.
+
+The published library itself does **not** depend on Tailwind.
+
+---
+
+## Additional resources
+
+- [Angular CLI docs](https://angular.dev/tools/cli)
+- [ng-packagr](https://github.com/ng-packagr/ng-packagr)
+- [ngx-scanner-qrcode](https://www.npmjs.com/package/ngx-scanner-qrcode)

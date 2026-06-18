@@ -1,18 +1,61 @@
-# Angular QR Code Scanner
+# angular-qr-code-scanner
 
-A lightweight and easy-to-use Angular library for scanning QR codes using the device camera. Built on top of [`ngx-scanner-qrcode`](https://www.npmjs.com/package/ngx-scanner-qrcode) and Angular Material, with built-in iOS camera recovery, automatic camera switching, torch control, and continuous-scan mode.
+[![npm version](https://img.shields.io/npm/v/angular-qr-code-scanner.svg)](https://www.npmjs.com/package/angular-qr-code-scanner)
+[![npm downloads](https://img.shields.io/npm/dm/angular-qr-code-scanner.svg)](https://www.npmjs.com/package/angular-qr-code-scanner)
+[![CI](https://github.com/Thai-Informatics-System/angular-qr-code-scanner/actions/workflows/bump-version.yml/badge.svg)](https://github.com/Thai-Informatics-System/angular-qr-code-scanner/actions/workflows/bump-version.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Angular](https://img.shields.io/badge/Angular-19%2B-dd0031.svg)](https://angular.dev)
+
+A lightweight Angular library for scanning QR codes using the device camera. Drop in one component and get instant QR scanning with iOS recovery, torch control, back-camera auto-selection, and continuous-scan mode — all backed by Angular Material UI.
+
+Built on top of [`ngx-scanner-qrcode`](https://www.npmjs.com/package/ngx-scanner-qrcode).
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage in a Standalone Component](#usage-in-a-standalone-component)
+- [Usage inside a Material Dialog](#usage-inside-a-material-dialog)
+- [API Reference](#api-reference)
+- [Config Options](#config-options)
+- [Programmatic Resume](#programmatic-resume)
+- [Camera Permissions](#camera-permissions)
+- [Browser Support](#browser-support)
+- [Styling](#styling)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Changelog](#changelog)
+- [License](#license)
+
+---
 
 ## Features
 
-* 📷 Scan QR codes using the device camera
-* ⚡ Fast and lightweight
-* 📱 Mobile and desktop browser support
-* 🔄 Continuous or single-shot scanning, with programmatic resume
-* 🔦 Torch (flashlight) toggle where supported
-* 🔁 Automatic back-camera selection and camera switching
-* 🍏 iOS Safari black-frame recovery built in
-* 🎯 Scan-result event callbacks
-* 🧩 Angular Material UI integration
+- **One-component drop-in** — `<angular-qr-code-scanner>` handles everything
+- **Single-shot and continuous scan modes** with a built-in toggle
+- **iOS Safari black-frame recovery** — auto-recreates the `<video>` element on first load
+- **Torch (flashlight) toggle** where the browser/device supports it
+- **Automatic back-camera selection** across multi-camera devices
+- **Camera-switch button** to cycle through available cameras
+- **Programmatic resume** — pass a new config with `playPause: true` to restart after a pause
+- **Angular Material UI** — no extra CSS framework required
+- **Strict TypeScript** with exported interfaces for full type safety
+
+---
+
+## Requirements
+
+| Dependency          | Version              |
+| ------------------- | -------------------- |
+| Angular             | 19+                  |
+| `@angular/material` | 19+                  |
+| `@angular/cdk`      | 19+                  |
+| `ngx-scanner-qrcode` | ^1.7.6             |
+| Browser             | Modern browser with `getUserMedia` support |
 
 ---
 
@@ -22,80 +65,45 @@ A lightweight and easy-to-use Angular library for scanning QR codes using the de
 npm install angular-qr-code-scanner
 ```
 
-This library has the following peer dependencies, which you must have installed in your app:
+Install peer dependencies if not already present:
 
 ```bash
-npm install @angular/common @angular/core ngx-scanner-qrcode
+npm install @angular/material @angular/cdk ngx-scanner-qrcode
 ```
 
-It also relies on Angular Material modules (`@angular/material`) and the Angular CDK (`@angular/cdk`) for its UI.
-
 ---
 
-## Requirements
+## Quick Start
 
-| Dependency        | Version          |
-| ----------------- | ---------------- |
-| Angular           | 19+              |
-| @angular/material | 19+              |
-| ngx-scanner-qrcode | ^1.7.6          |
-| Browser           | Modern browser with camera support |
-
----
-
-## Basic Usage
-
-### Import the Module
-
-The scanner is exposed as a declared component inside `AngularQrCodeScannerModule`. Import the module wherever you need the scanner (an `NgModule` or the `imports` array of a standalone component).
+**1. Import the module**
 
 ```typescript
+// app.module.ts (NgModule)
 import { AngularQrCodeScannerModule } from 'angular-qr-code-scanner';
 
 @NgModule({
-  imports: [
-    AngularQrCodeScannerModule
-  ]
+  imports: [AngularQrCodeScannerModule]
 })
 export class AppModule {}
 ```
 
-Standalone component:
-
-```typescript
-import { Component } from '@angular/core';
-import { AngularQrCodeScannerModule } from 'angular-qr-code-scanner';
-
-@Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [AngularQrCodeScannerModule],
-  templateUrl: './app.component.html'
-})
-export class AppComponent {}
-```
-
----
-
-### Template Example
+**2. Add the component to your template**
 
 ```html
 <angular-qr-code-scanner
-  [config]="scannerConfig"
+  [config]="config"
   (onScanned)="onScanned($event)"
   (onChangeMode)="onChangeMode($event)">
 </angular-qr-code-scanner>
 ```
 
----
-
-### Component Example
+**3. Wire up the component**
 
 ```typescript
 import { AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
 
 export class AppComponent {
-  scannerConfig: AngularQrCodeScannerConfig = {
+  config: AngularQrCodeScannerConfig = {
     isPauseAfterScan: true,
     isEnableMode: true,
     isValidate: false,
@@ -103,11 +111,121 @@ export class AppComponent {
   };
 
   onScanned(result: string): void {
-    console.log('QR Code Result:', result);
+    console.log('QR value:', result);
   }
 
   onChangeMode(isContinuousMode: boolean): void {
-    console.log('Continuous mode:', isContinuousMode);
+    this.config = { ...this.config, isContinuousMode };
+  }
+}
+```
+
+---
+
+## Usage in a Standalone Component
+
+```typescript
+import { Component } from '@angular/core';
+import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
+
+@Component({
+  selector: 'app-scanner',
+  standalone: true,
+  imports: [AngularQrCodeScannerModule],
+  template: `
+    <angular-qr-code-scanner
+      [config]="config"
+      (onScanned)="onScanned($event)"
+      (onChangeMode)="onChangeMode($event)">
+    </angular-qr-code-scanner>
+
+    <p *ngIf="result">Last scan: {{ result }}</p>
+  `
+})
+export class ScannerComponent {
+  result = '';
+
+  config: AngularQrCodeScannerConfig = {
+    isPauseAfterScan: true,
+    isEnableMode: true,
+    isContinuousMode: false,
+  };
+
+  onScanned(value: string): void {
+    this.result = value;
+  }
+
+  onChangeMode(isContinuousMode: boolean): void {
+    this.config = { ...this.config, isContinuousMode };
+  }
+}
+```
+
+---
+
+## Usage inside a Material Dialog
+
+Open the scanner inside a `MatDialog` and close it with the decoded value:
+
+**Dialog component:**
+
+```typescript
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
+
+export interface ScanDialogData {
+  label?: string;
+  config?: AngularQrCodeScannerConfig;
+}
+
+@Component({
+  selector: 'app-scan-dialog',
+  standalone: true,
+  imports: [AngularQrCodeScannerModule],
+  template: `
+    <h2 mat-dialog-title>{{ data.label ?? 'Scan QR Code' }}</h2>
+    <mat-dialog-content>
+      <angular-qr-code-scanner
+        [config]="config"
+        (onScanned)="onScanned($event)">
+      </angular-qr-code-scanner>
+    </mat-dialog-content>
+  `
+})
+export class ScanDialogComponent {
+  config: AngularQrCodeScannerConfig;
+
+  constructor(
+    private dialogRef: MatDialogRef<ScanDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: ScanDialogData
+  ) {
+    this.config = data.config ?? { isPauseAfterScan: true, isEnableMode: true };
+  }
+
+  onScanned(result: string): void {
+    this.dialogRef.close(result);
+  }
+}
+```
+
+**Opener:**
+
+```typescript
+import { MatDialog } from '@angular/material/dialog';
+import { ScanDialogComponent } from './scan-dialog.component';
+
+@Component({ ... })
+export class AppComponent {
+  constructor(private dialog: MatDialog) {}
+
+  openScanner(): void {
+    this.dialog.open(ScanDialogComponent, {
+      width: '400px',
+      data: { label: 'Scan your ticket', config: { isPauseAfterScan: true } },
+    }).afterClosed().subscribe((result?: string) => {
+      if (result) console.log('Scanned:', result);
+    });
   }
 }
 ```
@@ -118,112 +236,147 @@ export class AppComponent {
 
 ### Inputs
 
-| Input    | Type                          | Description                                  |
-| -------- | ----------------------------- | -------------------------------------------- |
-| `config` | `AngularQrCodeScannerConfig`  | Scanner behaviour configuration (see below). |
-
-### `AngularQrCodeScannerConfig`
-
-| Property            | Type      | Default | Description                                                                 |
-| ------------------- | --------- | ------- | --------------------------------------------------------------------------- |
-| `isPauseAfterScan`  | `boolean` | `true`  | Pause the scanner automatically after a successful scan.                    |
-| `isEnableMode`      | `boolean` | `true`  | Show the single-shot / continuous mode toggle button.                       |
-| `isValidate`        | `boolean` | `false` | Validate the scanned QR payload before emitting (optional).                 |
-| `isContinuousMode`  | `boolean` | `false` | Keep scanning without requiring a manual resume (optional).                 |
-| `playPause`         | `boolean` | `false` | Pass a new config object with `playPause: true` to programmatically resume. |
+| Input    | Type                         | Required | Description                       |
+| -------- | ---------------------------- | -------- | --------------------------------- |
+| `config` | `AngularQrCodeScannerConfig` | Yes      | Scanner behaviour configuration.  |
 
 ### Outputs
 
-| Output         | Type                    | Description                                            |
-| -------------- | ----------------------- | ------------------------------------------------------ |
-| `onScanned`    | `EventEmitter<string>`  | Emits the decoded QR code value on a successful scan.  |
-| `onChangeMode` | `EventEmitter<boolean>` | Emits the new continuous-mode state when it's toggled. |
+| Output         | Payload type | Description                                                  |
+| -------------- | ------------ | ------------------------------------------------------------ |
+| `onScanned`    | `string`     | Emits the decoded QR string on every successful scan.        |
+| `onChangeMode` | `boolean`    | Emits the new `isContinuousMode` state when the user toggles.|
+
+---
+
+## Config Options
+
+```typescript
+export interface AngularQrCodeScannerConfig {
+  isPauseAfterScan: boolean;  // Pause automatically after a successful scan. Default: true
+  isEnableMode: boolean;      // Show the single-shot / continuous mode toggle. Default: true
+  isValidate?: boolean;       // Validate the payload before emitting. Default: false
+  isContinuousMode?: boolean; // Keep scanning without manual resume. Default: false
+  playPause?: boolean;        // Pass true in a new config object to programmatically resume.
+}
+```
+
+| Property           | Type      | Default | Description                                                                      |
+| ------------------ | --------- | ------- | -------------------------------------------------------------------------------- |
+| `isPauseAfterScan` | `boolean` | `true`  | Freeze the camera preview after a successful scan so the user can read the code. |
+| `isEnableMode`     | `boolean` | `true`  | Show the toggle button that switches between single-shot and continuous modes.   |
+| `isValidate`       | `boolean` | `false` | Run additional payload validation before emitting via `onScanned`.               |
+| `isContinuousMode` | `boolean` | `false` | Keep scanning automatically without requiring a manual resume.                   |
+| `playPause`        | `boolean` | `false` | Set to `true` in a **new object reference** to programmatically resume scanning. |
+
+---
+
+## Programmatic Resume
+
+After a scan pauses the camera, pass a new config object with `playPause: true` to resume without user interaction:
+
+```typescript
+onScanned(result: string): void {
+  this.result = result;
+  doSomethingWith(result).then(() => {
+    // Resume scanning
+    this.config = { ...this.config, playPause: true };
+  });
+}
+```
+
+> **Important:** always spread into a new object — the component uses object-reference change detection to detect the trigger.
 
 ---
 
 ## Camera Permissions
 
-The browser requests camera access when the scanner starts. Most browsers require a secure context for camera access:
+The browser requests camera access when the scanner initialises. Camera access requires a **secure context**:
 
-* Production: `https://your-domain.com`
-* Local development: `http://localhost:4200` (treated as secure)
+- **Production**: `https://your-domain.com`
+- **Local dev**: `http://localhost` (treated as secure by browsers)
 
-On iOS Safari, the underlying `<video>` element is automatically muted and marked `playsinline`, and a one-time element recreation is performed to work around the first-load black-frame issue.
+On **iOS Safari**, the component automatically:
+1. Sets `muted` and `playsinline` on the underlying `<video>` element
+2. Recreates the element once to work around the first-load black-frame issue
 
 ---
 
 ## Browser Support
 
-| Browser        | Supported |
-| -------------- | --------- |
-| Chrome         | ✅         |
-| Edge           | ✅         |
-| Firefox        | ✅         |
-| Safari         | ✅         |
-| Android Chrome | ✅         |
-| iOS Safari     | ✅         |
+| Browser         | Supported |
+| --------------- | --------- |
+| Chrome (desktop) | ✅        |
+| Edge            | ✅        |
+| Firefox         | ✅        |
+| Safari (macOS)  | ✅        |
+| Chrome (Android) | ✅       |
+| Safari (iOS)    | ✅        |
+
+> Camera access is gated on `https` in all modern browsers (except `localhost`).
 
 ---
 
 ## Styling
 
-The scanner fills the width of its container. Constrain it with your own wrapper:
+The scanner fills the width of its container. Constrain it with a wrapper:
 
 ```css
 angular-qr-code-scanner {
-  width: 100%;
   display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
 }
 ```
+
+The component uses Angular Material internally; make sure a Material theme is loaded in your application (e.g., `@angular/material/prebuilt-themes/azure-blue.css`).
 
 ---
 
 ## Troubleshooting
 
-### Camera Not Opening
+### Camera not opening
 
-* Camera permissions are granted
-* HTTPS is enabled in production
-* Camera is not in use by another application
+- Check that the user has granted camera permission in the browser.
+- Confirm the page is served over `https` in production.
+- Ensure no other tab or app is holding the camera.
 
-### Scanner Not Detecting QR Codes
+### Black screen on iOS Safari
 
-* QR code is clearly visible and well lit
-* Camera focus is working properly
-* Try the camera-switch button if multiple cameras are available
+The library handles this automatically via a one-time `<video>` element recreation. If you still see a black frame, confirm you are on iOS 14.3+ (minimum for `getUserMedia` on iOS Safari).
 
----
+### QR code not detected
 
-## Development
+- Make sure the code is well-lit and fully in frame.
+- Try the camera-switch button if the front camera is selected by default.
+- Increase ambient light or reduce camera distance.
 
-```bash
-# Clone repository
-git clone https://github.com/Thai-Informatics-System/angular-qr-code-scanner.git
+### Tests fail in CI
 
-# Install dependencies
-npm install
-
-# Build the library
-ng build angular-qr-code-scanner
-
-# Run the demo application
-ng serve
-```
+Karma tests need a real or headless Chrome. In GitHub Actions the runner includes Chrome; run tests with `--browsers=ChromeHeadless`.
 
 ---
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome.
+Contributions, bug reports, and feature requests are welcome.
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit changes
-4. Push the branch
-5. Open a Pull Request
+2. Create a feature branch: `git checkout -b feat/my-feature`
+3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/)
+4. Push the branch and open a Pull Request
+
+Please open an issue before starting work on large changes so we can align on direction.
+
+---
+
+## Changelog
+
+See [GitHub Releases](https://github.com/Thai-Informatics-System/angular-qr-code-scanner/releases) for the full change history.
 
 ---
 
 ## License
 
-MIT License
+[MIT](https://opensource.org/licenses/MIT) © Thai Informatics System
