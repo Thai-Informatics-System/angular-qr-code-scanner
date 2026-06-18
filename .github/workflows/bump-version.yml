@@ -121,6 +121,6 @@ jobs:
           "
 
       - name: Publish to npm
-        run: npm publish ./dist/${{ env.LIB_NAME }} --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "registry=https://registry.npmjs.org/" > "$HOME/.npmrc"
+          npm publish ./dist/${{ env.LIB_NAME }} --access public --provenance

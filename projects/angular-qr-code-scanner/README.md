@@ -1,7 +1,7 @@
-# angular-qr-code-scanner
+# @servicemind.tis/angular-qr-code-scanner
 
-[![npm version](https://img.shields.io/npm/v/angular-qr-code-scanner.svg)](https://www.npmjs.com/package/angular-qr-code-scanner)
-[![npm downloads](https://img.shields.io/npm/dm/angular-qr-code-scanner.svg)](https://www.npmjs.com/package/angular-qr-code-scanner)
+[![npm version](https://img.shields.io/npm/v/%40servicemind.tis%2Fangular-qr-code-scanner.svg)](https://www.npmjs.com/package/@servicemind.tis/angular-qr-code-scanner)
+[![npm downloads](https://img.shields.io/npm/dm/%40servicemind.tis%2Fangular-qr-code-scanner.svg)](https://www.npmjs.com/package/@servicemind.tis/angular-qr-code-scanner)
 [![CI](https://github.com/Thai-Informatics-System/angular-qr-code-scanner/actions/workflows/bump-version.yml/badge.svg)](https://github.com/Thai-Informatics-System/angular-qr-code-scanner/actions/workflows/bump-version.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Angular](https://img.shields.io/badge/Angular-19%2B-dd0031.svg)](https://angular.dev)
@@ -62,7 +62,7 @@ Built on top of [`ngx-scanner-qrcode`](https://www.npmjs.com/package/ngx-scanner
 ## Installation
 
 ```bash
-npm install angular-qr-code-scanner
+npm install @servicemind.tis/angular-qr-code-scanner
 ```
 
 Install peer dependencies if not already present:
@@ -79,7 +79,7 @@ npm install @angular/material @angular/cdk ngx-scanner-qrcode
 
 ```typescript
 // app.module.ts (NgModule)
-import { AngularQrCodeScannerModule } from 'angular-qr-code-scanner';
+import { AngularQrCodeScannerModule } from '@servicemind.tis/angular-qr-code-scanner';
 
 @NgModule({
   imports: [AngularQrCodeScannerModule]
@@ -100,7 +100,7 @@ export class AppModule {}
 **3. Wire up the component**
 
 ```typescript
-import { AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
+import { AngularQrCodeScannerConfig } from '@servicemind.tis/angular-qr-code-scanner';
 
 export class AppComponent {
   config: AngularQrCodeScannerConfig = {
@@ -126,7 +126,7 @@ export class AppComponent {
 
 ```typescript
 import { Component } from '@angular/core';
-import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
+import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from '@servicemind.tis/angular-qr-code-scanner';
 
 @Component({
   selector: 'app-scanner',
@@ -172,7 +172,7 @@ Open the scanner inside a `MatDialog` and close it with the decoded value:
 ```typescript
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
+import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from '@servicemind.tis/angular-qr-code-scanner';
 
 export interface ScanDialogData {
   label?: string;

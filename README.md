@@ -34,7 +34,7 @@ angular-qr-code-scanner/
 ## Installation
 
 ```bash
-npm install angular-qr-code-scanner
+npm install @servicemind.tis/angular-qr-code-scanner
 ```
 
 Peer dependencies (if not already installed):
@@ -51,7 +51,7 @@ npm install @angular/material @angular/cdk ngx-scanner-qrcode
 
 ```typescript
 import { Component } from '@angular/core';
-import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from 'angular-qr-code-scanner';
+import { AngularQrCodeScannerModule, AngularQrCodeScannerConfig } from '@servicemind.tis/angular-qr-code-scanner';
 
 @Component({
   selector: 'app-scan',
