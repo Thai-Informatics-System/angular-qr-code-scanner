@@ -8,9 +8,8 @@ export interface AngularQrCodeScannerConfig {
   /** Allow continuous scanning without manual resume. Default: false */
   isContinuousMode?: boolean;
   /**
-   * Set to true to programmatically resume the scanner after a pause.
-   * Pass a new config object reference with playPause: true to trigger play.
-   * Default: false
+   * Controls scanner play/pause state. `false` resumes scanning, `true` pauses it.
+   * Pass a new config object reference when toggling. Default: false
    */
   playPause?: boolean;
 }

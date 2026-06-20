@@ -1,5 +1,5 @@
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { Observable, map, shareReplay } from 'rxjs';
@@ -11,27 +11,14 @@ import { AngularQrCodeScannerConfig } from '../angular-qr-code-scanner.models';
   templateUrl: './angular-qr-code-scanner.component.html',
   styleUrl: './angular-qr-code-scanner.component.css'
 })
-export class AngularQrCodeScannerComponent {
-  private _config: AngularQrCodeScannerConfig = {
+export class AngularQrCodeScannerComponent implements OnChanges {
+  @Input() config: AngularQrCodeScannerConfig = {
     isPauseAfterScan: true,
     isEnableMode: true,
     isValidate: false,
     isContinuousMode: false,
     playPause: false,
   };
-
-  @Input() set config(value: AngularQrCodeScannerConfig) {
-    const prevPlayPause = this._config.playPause;
-    this._config = value;
-    if (value.playPause && value.playPause !== prevPlayPause) {
-      this.action?.play();
-      this.prepareVideoForIos();
-      this.tryPlayVideo();
-    }
-  }
-  get config(): AngularQrCodeScannerConfig {
-    return this._config;
-  }
   public qrConfig: ScannerQRCodeConfig = {
     constraints: {
       video: {
@@ -103,6 +90,22 @@ export class AngularQrCodeScannerComponent {
       console.log('IS HANDSET:', r);
       this.isMobile = r;
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['config'] && !changes['config'].firstChange) {
+      const prevPlayPause = changes['config'].previousValue?.playPause;
+      const currPlayPause = changes['config'].currentValue?.playPause;
+      if (currPlayPause !== prevPlayPause) {
+        if (currPlayPause === false) {
+          this.action?.play();
+          this.prepareVideoForIos();
+          this.tryPlayVideo();
+        } else if (currPlayPause === true) {
+          this.action?.pause();
+        }
+      }
+    }
   }
 
   ngAfterViewInit() {
@@ -376,6 +379,7 @@ export class AngularQrCodeScannerComponent {
   public onEvent(e: ScannerQRCodeResult[], action?: any): void {
     if(this.config?.isPauseAfterScan){
       e && action && action.pause();
+      this.config.playPause = true;
     }
     console.log('onEvent:', e[0].value);
     this.qrResultString = e[0].value;
