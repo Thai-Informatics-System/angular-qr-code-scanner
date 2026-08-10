@@ -25,6 +25,8 @@
   "peerDependencies": {
     "@angular/common": "^19.2.0",
     "@angular/core": "^19.2.0",
+    "@angular/material": "^19.2.8",
+    "@angular/cdk": "^19.2.8",
     "ngx-scanner-qrcode": "^1.7.6"
   },
   "dependencies": {
