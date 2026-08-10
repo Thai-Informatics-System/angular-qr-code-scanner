@@ -16,7 +16,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Thai-Informatics-System/angular-qr-code-scanner.git"
+    "url": "git+https://github.com/Thai-Informatics-System/angular-qr-code-scanner.git"
   },
   "homepage": "https://github.com/Thai-Informatics-System/angular-qr-code-scanner#readme",
   "bugs": {
