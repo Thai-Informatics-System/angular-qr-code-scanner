@@ -22,7 +22,7 @@
 
     <div class="w-full flex justify-center gap-3 absolute w-full bottom-0 left-0 bg-transparent bottom-action"
         style="z-index: 1; bottom: 0px; left: 0px;">
-        @if (action.devices.value.length > 1) {
+        @if (action.devices.value.length >= 1) {
         <button mat-icon-button (click)="onDeviceSelectChange()">
             <mat-icon class="text-white">cameraswitch</mat-icon>
         </button>
