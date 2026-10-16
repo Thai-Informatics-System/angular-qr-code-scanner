@@ -265,32 +265,42 @@ export class AngularQrCodeScannerComponent implements OnChanges {
     return /back|rear|environment/i.test(device?.label || '');
   }
 
+  private isFrontCamera(device: any): boolean {
+    return /front|user|selfie|facetime/i.test(device?.label || '');
+  }
+
   private orderDevicesBackFirst(devices: any[]): any[] {
     return [...devices.filter(d => this.isBackCamera(d)), ...devices.filter(d => !this.isBackCamera(d))];
   }
 
   /**
    * Update the video constraints the scanner uses for its next getUserMedia.
-   * Passing a facing mode keeps/sets `facingMode: { ideal }`; passing null
-   * drops it so an explicit deviceId (which playDevice() only sets as an
-   * ideal) is not out-voted by the facing mode when cycling devices.
+   * Passing a facing mode sets `facingMode: { ideal | exact }`; passing null
+   * drops it. A deviceId, when given, is pinned with `exact`.
    */
-  private setFacingConstraint(facing: 'environment' | 'user' | null): void {
+  private setVideoConstraints(
+    facing: 'environment' | 'user' | null,
+    options: { deviceId?: string; exactFacing?: boolean } = {}
+  ): void {
     const action: any = this.action;
     const { deviceId, facingMode, ...video } = action?.constraints?.video || {};
-    action.constraints = {
-      ...action.constraints,
-      video: facing ? { ...video, facingMode: { ideal: facing } } : video,
-    };
+    if (facing) {
+      video.facingMode = options.exactFacing ? { exact: facing } : { ideal: facing };
+    }
+    if (options.deviceId) {
+      video.deviceId = { exact: options.deviceId };
+    }
+    action.constraints = { ...action.constraints, video };
   }
 
   /**
-   * Play a device id with the facing-mode constraint removed. Used when the
-   * device list is trustworthy (labelled back camera / switching between
-   * several enumerated devices).
+   * Play a specific device. playDevice() only passes the id as an *ideal*
+   * constraint, which browsers may ignore (they keep the back lens). Its
+   * constraints merge spreads our video constraints after the bare id, so an
+   * `exact` deviceId set here wins and forces the requested camera.
    */
   private playDeviceById(deviceId: string, facing: 'environment' | 'user' | null = null) {
-    this.setFacingConstraint(facing);
+    this.setVideoConstraints(facing, { deviceId });
     return this.action.playDevice(deviceId);
   }
 
@@ -301,15 +311,24 @@ export class AngularQrCodeScannerComponent implements OnChanges {
    * playback, so we attach the stream ourselves and mirror what playDevice()
    * does afterwards (scan loop + status flags).
    */
-  private playFacingMode(facing: 'environment' | 'user'): Promise<void> {
+  private playFacingMode(facing: 'environment' | 'user', exactFacing = false): Promise<void> {
     const action: any = this.action;
     this.preferredFacing = facing;
-    this.setFacingConstraint(facing);
+    this.setVideoConstraints(facing, { exactFacing });
     action.stop();
     action.STATUS?.loadingON?.();
 
     return navigator.mediaDevices
       .getUserMedia({ audio: false, video: action.constraints.video })
+      .catch((error: any) => {
+        // `exact` fails on devices without that lens (e.g. laptops); retry
+        // with `ideal` so we still get a stream.
+        if (exactFacing && /Overconstrained|ConstraintNotSatisfied/i.test(error?.name || '')) {
+          this.setVideoConstraints(facing);
+          return navigator.mediaDevices.getUserMedia({ audio: false, video: action.constraints.video });
+        }
+        throw error;
+      })
       .then((stream: MediaStream) => {
         const video: HTMLVideoElement = action.video.nativeElement;
         const activeId = stream.getVideoTracks()[0]?.getSettings?.().deviceId;
@@ -413,27 +432,38 @@ export class AngularQrCodeScannerComponent implements OnChanges {
     this.cameraActive = false;
     this.prepareVideoForIos();
 
-    // Only one camera enumerated: the phone may still have front + back lenses
-    // behind it, so toggle the facing mode instead of cycling device ids.
-    if (availableDevices.length === 1) {
-      const nextFacing = this.preferredFacing === 'environment' ? 'user' : 'environment';
-      this.playFacingMode(nextFacing).catch((error: any) => {
-        console.log('facingMode switch failed', error);
-        // Keep the retry loop going (capped at maxAutoSwitchAttempts).
-        this.showCameraError();
-      });
-    } else {
-      const ordered = this.orderDevicesBackFirst(availableDevices);
-      this.selectedIndex = (this.selectedIndex + 1) % ordered.length;
-      this.preferredFacing = this.isBackCamera(ordered[this.selectedIndex]) ? 'environment' : 'user';
-      this.playDeviceById(ordered[this.selectedIndex].deviceId).subscribe(
+    const onSwitchError = (error: any) => {
+      console.log('camera switch failed', error);
+      // Keep the retry loop going (capped at maxAutoSwitchAttempts).
+      this.showCameraError();
+    };
+
+    const hasFacingLabels = availableDevices.some(
+      (d: any) => this.isBackCamera(d) || this.isFrontCamera(d)
+    );
+
+    if (availableDevices.length > 1 && !hasFacingLabels) {
+      // Several cameras but no facing info (e.g. desktop webcams): cycle ids.
+      this.selectedIndex = (this.selectedIndex + 1) % availableDevices.length;
+      this.playDeviceById(availableDevices[this.selectedIndex].deviceId).subscribe(
         () => this.tryPlayVideo(),
-        (error: any) => {
-          console.log('playDevice failed on switch', error);
-          // Keep the retry loop going (capped at maxAutoSwitchAttempts).
-          this.showCameraError();
-        }
+        onSwitchError
       );
+    } else {
+      // Phones: toggle back <-> front. Phones list several back lenses (wide,
+      // ultra wide, tele...), so cycling ids would just hop between back
+      // cameras. Pick the first camera labelled for the target side, or fall
+      // back to facingMode when there is none (single/unlabelled device).
+      const nextFacing = this.preferredFacing === 'environment' ? 'user' : 'environment';
+      const target = availableDevices.find((d: any) =>
+        nextFacing === 'environment' ? this.isBackCamera(d) : this.isFrontCamera(d)
+      );
+      this.preferredFacing = nextFacing;
+      if (target) {
+        this.playDeviceById(target.deviceId).subscribe(() => this.tryPlayVideo(), onSwitchError);
+      } else {
+        this.playFacingMode(nextFacing, true).catch(onSwitchError);
+      }
     }
     setTimeout(() => {
       this.loadedCamera = true;
