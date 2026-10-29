@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/%40servicemind.tis%2Fangular-qr-code-scanner.svg)](https://www.npmjs.com/package/@servicemind.tis/angular-qr-code-scanner)
 [![CI](https://github.com/Thai-Informatics-System/angular-qr-code-scanner/actions/workflows/bump-version.yml/badge.svg)](https://github.com/Thai-Informatics-System/angular-qr-code-scanner/actions/workflows/bump-version.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Angular](https://img.shields.io/badge/Angular-19%2B-dd0031.svg)](https://angular.dev)
+[![Angular](https://img.shields.io/badge/Angular-22-dd0031.svg)](https://angular.dev)
 
 A lightweight Angular library for scanning QR codes using the device camera. Drop in one component and get instant QR scanning with iOS recovery, torch control, back-camera auto-selection, and continuous-scan mode — all backed by Angular Material UI.
 
@@ -51,11 +51,18 @@ Built on top of [`ngx-scanner-qrcode`](https://www.npmjs.com/package/ngx-scanner
 
 | Dependency          | Version              |
 | ------------------- | -------------------- |
-| Angular             | 19+                  |
-| `@angular/material` | 19+                  |
-| `@angular/cdk`      | 19+                  |
-| `ngx-scanner-qrcode` | ^1.7.6             |
+| Angular             | ^22.0.0              |
+| `@angular/material` | ^22.0.0              |
+| `@angular/cdk`      | ^22.0.0              |
+| `ngx-scanner-qrcode` | ^1.8.0              |
 | Browser             | Modern browser with `getUserMedia` support |
+
+| Library | Angular, Material, CDK |
+| ------- | ---------------------- |
+| 2.x     | 22.x                   |
+| 1.x     | 19.x                   |
+
+**2.0.0** — built with Angular 22 (partial compilation), so it needs Angular 22 and does not work on older versions; stay on 1.x for Angular 19. The `ngx-scanner-qrcode` peer moves to `^1.8.0` (1.8.x declares Angular 18–24 support; 1.7.9 shipped broken peer metadata).
 
 ---
 
@@ -68,7 +75,7 @@ npm install @servicemind.tis/angular-qr-code-scanner
 Install peer dependencies if not already present:
 
 ```bash
-npm install @angular/material @angular/cdk ngx-scanner-qrcode
+npm install @angular/material@^22 @angular/cdk@^22 ngx-scanner-qrcode@^1.8.0
 ```
 
 ---
