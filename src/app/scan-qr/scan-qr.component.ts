@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -9,9 +9,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-scan-qr',
-  imports: [CommonModule, AngularQrCodeScannerModule, MatDialogModule, MatIconModule, MatToolbarModule, MatButtonModule],
+  imports: [AngularQrCodeScannerModule, MatDialogModule, MatIconModule, MatToolbarModule, MatButtonModule],
   templateUrl: './scan-qr.component.html',
   styleUrl: './scan-qr.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class ScanQrComponent implements OnInit {

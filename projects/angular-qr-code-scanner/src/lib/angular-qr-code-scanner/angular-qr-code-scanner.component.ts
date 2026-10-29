@@ -1,5 +1,5 @@
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { Observable, map, shareReplay } from 'rxjs';
@@ -9,6 +9,7 @@ import { AngularQrCodeScannerConfig } from '../angular-qr-code-scanner.models';
   selector: 'angular-qr-code-scanner',
   standalone: false,
   templateUrl: './angular-qr-code-scanner.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './angular-qr-code-scanner.component.css'
 })
 export class AngularQrCodeScannerComponent implements OnChanges {

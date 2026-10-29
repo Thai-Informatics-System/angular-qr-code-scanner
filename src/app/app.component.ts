@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AngularQrCodeScannerConfig, AngularQrCodeScannerModule } from '../../projects/angular-qr-code-scanner/src/public-api';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-root',
   imports: [CommonModule, AngularQrCodeScannerModule, MatButtonModule, MatIconModule, MatDialogModule],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
