@@ -2,7 +2,7 @@ name: CI — Test, Bump Version, Tag and Publish
 
 on:
   push:
-    branches: [master]
+    branches: [1.x]  # 1.x line (Angular 19/20); master publishes 2.x
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
@@ -100,7 +100,7 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add package.json projects/${{ env.LIB_NAME }}/package.json
             git commit -m "chore: bump version for ${{ env.LIB_NAME }} [skip ci]"
-            git pull --rebase origin master
+            git pull --rebase origin 1.x
             git push
           fi
 
@@ -156,4 +156,4 @@ jobs:
         run: |
           # Clear authToken so npm uses OIDC trusted publishing
           echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
-          npm publish ./dist/${{ env.LIB_NAME }} --access public --provenance
+          npm publish ./dist/${{ env.LIB_NAME }} --access public --provenance --tag v1  # keep "latest" on 2.x
