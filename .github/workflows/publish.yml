@@ -156,4 +156,4 @@ jobs:
         run: |
           # Clear authToken so npm uses OIDC trusted publishing
           echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
-          npm publish ./dist/${{ env.LIB_NAME }} --access public --provenance --tag v1  # keep "latest" on 2.x
+          npm publish ./dist/${{ env.LIB_NAME }} --access public --provenance --tag release-1.x  # keep "latest" on 2.x (a dist-tag must not be a semver range, so not "v1")
