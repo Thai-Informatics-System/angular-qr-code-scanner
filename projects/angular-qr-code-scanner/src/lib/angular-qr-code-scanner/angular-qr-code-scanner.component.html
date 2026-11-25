@@ -6,7 +6,7 @@
     @if(error){
     <div
         class="w-full h-full absolute top-0 left-0 flex flex-col justify-center items-center bg-gray-900 bg-opacity-90 text-white p-4">
-        <mat-icon class="text-red-500 mb-3" style="font-size: 72px; width: 72px; height: 72px;">videocam_off</mat-icon>
+        <ng-container *ngTemplateOutlet="scannerIcon; context: { $implicit: resolvedIcons.cameraError, cls: 'text-red-500 mb-3', style: 'font-size: 72px; width: 72px; height: 72px;' }"></ng-container>
         <p class="text-center text-lg font-semibold mb-2">Camera Access Required</p>
         <p class="text-center text-sm">{{ errorText }}</p>
         <p class="text-center text-xs mt-3 text-gray-300">Please check your browser settings and allow camera access.
@@ -24,35 +24,34 @@
         style="z-index: 1; bottom: 0px; left: 0px;">
         @if (action.devices.value.length >= 1) {
         <button mat-icon-button (click)="onDeviceSelectChange()">
-            <mat-icon class="text-white">cameraswitch</mat-icon>
+            <ng-container *ngTemplateOutlet="scannerIcon; context: { $implicit: resolvedIcons.switchCamera }"></ng-container>
         </button>
         }
 
         <button mat-icon-button (click)="action.isTorch = !action.isTorch; handle(action, 'torcher')">
-            @if (action?.isTorch) {
-            <mat-icon class="text-white">flash_on</mat-icon>
-            }
-            @if (!action?.isTorch) {
-            <mat-icon class="text-white">flash_off</mat-icon>
-            }
+            <ng-container *ngTemplateOutlet="scannerIcon; context: { $implicit: action?.isTorch ? resolvedIcons.flashOn : resolvedIcons.flashOff }"></ng-container>
         </button>
 
         @if (action?.isPause) {
         <button mat-icon-button (click)="handle(action, 'play')">
-            <mat-icon class="text-white">restart_alt</mat-icon>
+            <ng-container *ngTemplateOutlet="scannerIcon; context: { $implicit: resolvedIcons.resume }"></ng-container>
         </button>
         }
 
         @if (config.isEnableMode) {
         <button mat-icon-button (click)="onClickMode()">
-            @if (config.isContinuousMode) {
-            <mat-icon class="text-white">repeat</mat-icon>
-            }
-            @if (!config.isContinuousMode) {
-            <mat-icon class="text-white">repeat_one</mat-icon>
-            }
+            <ng-container *ngTemplateOutlet="scannerIcon; context: { $implicit: config.isContinuousMode ? resolvedIcons.continuousMode : resolvedIcons.singleMode }"></ng-container>
         </button>
         }
     </div>
     }
 </div>
+
+<!-- One scanner icon (see the `icons` input): a ligature, a font-set icon or a registered SVG icon. -->
+<ng-template #scannerIcon let-icon let-cls="cls" let-style="style">
+    @if (icon.svgIcon) {
+    <mat-icon [class]="cls || 'text-white'" [style]="style || null" [svgIcon]="icon.svgIcon"></mat-icon>
+    } @else {
+    <mat-icon [class]="cls || 'text-white'" [style]="style || null" [fontSet]="icon.fontSet" [fontIcon]="icon.fontIcon">{{ icon.name }}</mat-icon>
+    }
+</ng-template>

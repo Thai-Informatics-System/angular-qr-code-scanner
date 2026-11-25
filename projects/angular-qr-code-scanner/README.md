@@ -22,6 +22,7 @@ Built on top of [`ngx-scanner-qrcode`](https://www.npmjs.com/package/ngx-scanner
 - [Usage inside a Material Dialog](#usage-inside-a-material-dialog)
 - [API Reference](#api-reference)
 - [Config Options](#config-options)
+- [Custom Icons](#custom-icons)
 - [Programmatic Resume](#programmatic-resume)
 - [Camera Permissions](#camera-permissions)
 - [Browser Support](#browser-support)
@@ -239,6 +240,7 @@ export class AppComponent {
 | Input    | Type                         | Required | Description                       |
 | -------- | ---------------------------- | -------- | --------------------------------- |
 | `config` | `AngularQrCodeScannerConfig` | Yes      | Scanner behaviour configuration.  |
+| `icons`  | `AngularQrCodeScannerIcons`  | No       | Icons of the controls; see [Custom Icons](#custom-icons). |
 
 ### Outputs
 
@@ -268,6 +270,43 @@ export interface AngularQrCodeScannerConfig {
 | `isValidate`       | `boolean` | `false` | Run additional payload validation before emitting via `onScanned`.               |
 | `isContinuousMode` | `boolean` | `false` | Keep scanning automatically without requiring a manual resume.                   |
 | `playPause`        | `boolean` | `false` | Set to `true` in a **new object reference** to programmatically resume scanning. |
+
+---
+
+## Custom Icons
+
+Pass `icons` to change the icons of the controls. Only the keys you give change; the others keep their default.
+
+```html
+<angular-qr-code-scanner
+  [config]="config"
+  [icons]="{ switchCamera: 'flip_camera_android', resume: 'play_arrow' }"
+  (onScanned)="onScanned($event)">
+</angular-qr-code-scanner>
+```
+
+| Key              | Shown on                                | Default        |
+| ---------------- | --------------------------------------- | -------------- |
+| `switchCamera`   | Switch camera (front / back)            | `cameraswitch` |
+| `flashOn`        | Flash button while the flash is on      | `flash_on`     |
+| `flashOff`       | Flash button while the flash is off     | `flash_off`    |
+| `resume`         | Resume button, shown while paused       | `restart_alt`  |
+| `continuousMode` | Mode button in continuous mode          | `repeat`       |
+| `singleMode`     | Mode button in single-scan mode         | `repeat_one`   |
+| `cameraError`    | "Camera Access Required" overlay        | `videocam_off` |
+
+Each value is an `AngularQrCodeScannerIcon`, rendered with `<mat-icon>`:
+
+```typescript
+icons: AngularQrCodeScannerIcons = {
+  flashOn: 'flash_on',                                            // Material Icons ligature
+  flashOff: { name: 'flash_off', fontSet: 'material-symbols-outlined' }, // ligature from another font set
+  switchCamera: { fontSet: 'fa', fontIcon: 'fa-camera-rotate' },  // class-based icon font
+  resume: { svgIcon: 'app:resume' },                              // SVG registered with MatIconRegistry
+};
+```
+
+The defaults are exported as `DEFAULT_QR_CODE_SCANNER_ICONS`.
 
 ---
 
