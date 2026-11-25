@@ -3,7 +3,15 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewC
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeService, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { Observable, map, shareReplay } from 'rxjs';
-import { AngularQrCodeScannerConfig } from '../angular-qr-code-scanner.models';
+import {
+  AngularQrCodeScannerConfig,
+  AngularQrCodeScannerIcon,
+  AngularQrCodeScannerIcons,
+  AngularQrCodeScannerResolvedIcon,
+  DEFAULT_QR_CODE_SCANNER_ICONS,
+} from '../angular-qr-code-scanner.models';
+
+type ScannerIconKey = keyof AngularQrCodeScannerIcons;
 
 @Component({
   selector: 'angular-qr-code-scanner',
@@ -20,6 +28,14 @@ export class AngularQrCodeScannerComponent implements OnChanges {
     isContinuousMode: false,
     playPause: false,
   };
+  /**
+   * Icons of the controls (switch camera, flash, resume, mode) and of the camera error overlay.
+   * Only the keys given replace the defaults (DEFAULT_QR_CODE_SCANNER_ICONS).
+   */
+  @Input() icons?: AngularQrCodeScannerIcons | null;
+  /** `icons` merged with the defaults, ready for the template. */
+  resolvedIcons: Record<ScannerIconKey, AngularQrCodeScannerResolvedIcon> = AngularQrCodeScannerComponent.resolveIcons(null);
+
   public qrConfig: ScannerQRCodeConfig = {
     constraints: {
       video: {
@@ -97,6 +113,9 @@ export class AngularQrCodeScannerComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['icons']) {
+      this.resolvedIcons = AngularQrCodeScannerComponent.resolveIcons(this.icons);
+    }
     if (changes['config'] && !changes['config'].firstChange) {
       const prevPlayPause = changes['config'].previousValue?.playPause;
       const currPlayPause = changes['config'].currentValue?.playPause;
@@ -110,6 +129,30 @@ export class AngularQrCodeScannerComponent implements OnChanges {
         }
       }
     }
+  }
+
+  private static resolveIcons(icons?: AngularQrCodeScannerIcons | null): Record<ScannerIconKey, AngularQrCodeScannerResolvedIcon> {
+    const resolved = {} as Record<ScannerIconKey, AngularQrCodeScannerResolvedIcon>;
+    (Object.keys(DEFAULT_QR_CODE_SCANNER_ICONS) as ScannerIconKey[]).forEach(key => {
+      resolved[key] = AngularQrCodeScannerComponent.resolveIcon(icons?.[key], DEFAULT_QR_CODE_SCANNER_ICONS[key]);
+    });
+    return resolved;
+  }
+
+  private static resolveIcon(icon: AngularQrCodeScannerIcon | null | undefined, fallback: AngularQrCodeScannerIcon): AngularQrCodeScannerResolvedIcon {
+    const value = icon ?? fallback;
+    if (typeof value === 'string') {
+      return value.trim()
+        ? { name: value.trim(), svgIcon: '', fontSet: '', fontIcon: '' }
+        : AngularQrCodeScannerComponent.resolveIcon(fallback, fallback);
+    }
+    const name = value?.name?.trim() || '';
+    const svgIcon = value?.svgIcon?.trim() || '';
+    const fontIcon = value?.fontIcon?.trim() || '';
+    if (!name && !svgIcon && !fontIcon) {
+      return AngularQrCodeScannerComponent.resolveIcon(fallback, fallback);
+    }
+    return { name, svgIcon, fontSet: value?.fontSet?.trim() || '', fontIcon };
   }
 
   ngAfterViewInit() {
